@@ -9,8 +9,8 @@
  */
 
 const COLORS = [
-  '#6366f1', '#3b82f6', '#10b981', '#f59e0b',
-  '#ec4899', '#06b6d4', '#8b5cf6', '#ef4444'
+  '#6366f1', '#a855f7', '#ec4899', '#06b6d4',
+  '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'
 ];
 
 export class NetworkGraph {
@@ -25,11 +25,11 @@ export class NetworkGraph {
     this.highlighted = null; // highlighted node key from BFS
 
     // Physics constants
-    this.repulsion    = 4000;
-    this.attraction   = 0.04;
-    this.damping      = 0.82;
-    this.centerPull   = 0.008;
-    this.minDist      = 60;
+    this.repulsion    = 5000;
+    this.attraction   = 0.05;
+    this.damping      = 0.85;
+    this.centerPull   = 0.006;
+    this.minDist      = 80;
 
     this._bindEvents();
     this._resizeObserver();
@@ -58,7 +58,7 @@ export class NetworkGraph {
         y: pos ? pos.y : cy + Math.sin(angle) * r + (Math.random() - 0.5) * 40,
         vx: 0, vy: 0,
         color: COLORS[i % COLORS.length],
-        radius: Math.max(22, Math.min(38, 22 + u.friendsCount * 4))
+        radius: Math.max(24, Math.min(42, 24 + u.friendsCount * 5))
       };
     });
 
@@ -75,10 +75,9 @@ export class NetworkGraph {
   }
 
   highlightBFS(levels) {
-    // levels: [ [nodeKeys at depth 0], [nodeKeys at depth 1], ... ]
     this._bfsLevels = levels;
     this._bfsStep = -1;
-    this._bfsColors = ['#f8fafc', '#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899'];
+    this._bfsColors = ['#ffffff', '#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'];
     this.nodes.forEach(n => n.bfsColor = null);
   }
 
@@ -118,7 +117,6 @@ export class NetworkGraph {
     const nodeMap = {};
     this.nodes.forEach(n => { nodeMap[n.id] = n; });
 
-    // Repulsion between all pairs
     for (let i = 0; i < this.nodes.length; i++) {
       for (let j = i + 1; j < this.nodes.length; j++) {
         const a = this.nodes[i], b = this.nodes[j];
@@ -133,27 +131,24 @@ export class NetworkGraph {
       }
     }
 
-    // Attraction along edges (spring)
     this.edges.forEach(e => {
       const a = nodeMap[e.source], b = nodeMap[e.target];
       if (!a || !b) return;
       const dx = b.x - a.x, dy = b.y - a.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const force = (dist - 140) * attraction;
+      const force = (dist - 160) * attraction;
       const fx = (dx / dist) * force;
       const fy = (dy / dist) * force;
       a.vx += fx; a.vy += fy;
       b.vx -= fx; b.vy -= fy;
     });
 
-    // Center gravity
     this.nodes.forEach(n => {
       n.vx += (cx - n.x) * centerPull;
       n.vy += (cy - n.y) * centerPull;
     });
 
-    // Integration + damping + boundary
-    const pad = 50;
+    const pad = 60;
     this.nodes.forEach(n => {
       if (this.dragging === n) { n.vx = 0; n.vy = 0; return; }
       n.vx *= damping;
@@ -180,72 +175,91 @@ export class NetworkGraph {
       const a = nodeMap[e.source], b = nodeMap[e.target];
       if (!a || !b) return;
 
-      const isHighlighted = a.highlighted || b.highlighted ||
-                            a.bfsColor || b.bfsColor;
+      const isSpecial = a.highlighted || b.highlighted || a.bfsColor || b.bfsColor;
 
       ctx.beginPath();
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(b.x, b.y);
-      ctx.strokeStyle = isHighlighted
-        ? 'rgba(99, 102, 241, 0.7)'
-        : 'rgba(255, 255, 255, 0.08)';
-      ctx.lineWidth = isHighlighted ? 2 : 1;
+      
+      const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+      if (isSpecial) {
+        grad.addColorStop(0, hexToRgba(a.bfsColor || a.color, 0.6));
+        grad.addColorStop(1, hexToRgba(b.bfsColor || b.color, 0.6));
+      } else {
+        grad.addColorStop(0, 'rgba(100, 116, 139, 0.1)');
+        grad.addColorStop(1, 'rgba(100, 116, 139, 0.1)');
+      }
+
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = isSpecial ? 3 : 1.5;
+      ctx.lineCap = 'round';
       ctx.stroke();
     });
 
     // Draw nodes
     this.nodes.forEach(n => {
       const isHovered = this.hovering === n;
-      const fillColor = n.bfsColor || n.color;
-      const r = n.radius + (isHovered ? 4 : 0);
+      const isSpec = n.highlighted || n.bfsColor;
+      const color = n.bfsColor || n.color;
+      const r = n.radius + (isHovered ? 6 : 0);
 
-      // Glow for highlighted / hovered
-      if (isHovered || n.highlighted || n.bfsColor) {
+      ctx.save();
+      
+      // Shadow / Glow
+      ctx.shadowBlur = isHovered || isSpec ? 25 : 0;
+      ctx.shadowColor = color;
+
+      // Glow Ring
+      if (isHovered || isSpec) {
         ctx.beginPath();
-        ctx.arc(n.x, n.y, r + 10, 0, Math.PI * 2);
-        const grad = ctx.createRadialGradient(n.x, n.y, r, n.x, n.y, r + 14);
-        grad.addColorStop(0, fillColor + '50');
-        grad.addColorStop(1, 'transparent');
-        ctx.fillStyle = grad;
-        ctx.fill();
+        ctx.arc(n.x, n.y, r + 8, 0, Math.PI * 2);
+        ctx.strokeStyle = hexToRgba(color, 0.3);
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
 
-      // Node circle
+      // Outer Circle
       ctx.beginPath();
       ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = fillColor + '22';
+      ctx.fillStyle = isHovered || isSpec ? hexToRgba(color, 0.15) : 'rgba(10, 10, 15, 0.85)';
       ctx.fill();
-      ctx.strokeStyle = fillColor;
-      ctx.lineWidth = isHovered ? 3 : 2;
+      ctx.strokeStyle = isHovered || isSpec ? color : hexToRgba(color, 0.6);
+      ctx.lineWidth = isHovered || isSpec ? 4 : 2;
       ctx.stroke();
 
-      // Initials text
-      ctx.fillStyle = fillColor;
-      ctx.font = `bold ${Math.max(11, r * 0.55)}px Inter, sans-serif`;
+      ctx.restore();
+
+      // Initials
+      ctx.fillStyle = isHovered || isSpec ? '#fff' : color;
+      ctx.font = `800 ${Math.max(12, r * 0.5)}px Outfit, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(n.label.substring(0, 2).toUpperCase(), n.x, n.y);
 
-      // Name label
-      ctx.fillStyle = isHovered ? '#f8fafc' : 'rgba(248,250,252,0.7)';
-      ctx.font = `${isHovered ? 600 : 500} 12px Inter, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText(n.label, n.x, n.y + r + 6);
-
-      // Friend count badge for hovered
-      if (isHovered) {
-        const badge = `${n.friendsCount} friends`;
-        const bw = ctx.measureText(badge).width + 16;
-        ctx.fillStyle = '#1e1e28';
-        ctx.beginPath();
-        ctx.roundRect(n.x - bw / 2, n.y - r - 30, bw, 22, 6);
-        ctx.fill();
-        ctx.fillStyle = fillColor;
-        ctx.font = '11px Inter, sans-serif';
+      // Label below
+      if (isHovered || this.nodes.length < 15) {
+        ctx.fillStyle = isHovered ? '#fff' : 'rgba(255,255,255,0.6)';
+        ctx.font = `${isHovered ? 700 : 500} 13px Inter, sans-serif`;
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(badge, n.x, n.y - r - 19);
+        ctx.textBaseline = 'top';
+        ctx.fillText(n.label, n.x, n.y + r + 10);
+      }
+
+      // Tooltip for hovered
+      if (isHovered) {
+        const txt = `${n.label} (@${n.id})`;
+        const tw = ctx.measureText(txt).width + 24;
+        ctx.fillStyle = 'rgba(0,0,0,0.9)';
+        ctx.beginPath();
+        ctx.roundRect(n.x - tw/2, n.y - r - 45, tw, 28, 10);
+        ctx.fill();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = '600 12px Inter, sans-serif';
+        ctx.fillText(txt, n.x, n.y - r - 31);
       }
     });
   }
