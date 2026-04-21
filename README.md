@@ -1,56 +1,61 @@
-# SocialGraph | Mini Engine v2.0
-Developed by **Chaitanya Ajay Bhujbal**
+# DSA Mini Project — SocialGraph Engine
 
-> A high-performance, algorithm-driven social network engine built with **JavaScript** and modern web technologies.
+## Project Structure
+```
+DSA_mini_project/
+├── web/                    # Vite-powered web application
+│   ├── index.html          # Main HTML shell
+│   ├── index.css           # Design system & styles
+│   ├── app.js              # Application controller
+│   ├── SocialNetwork.js    # Core graph engine (BFS, Heap, HashMap)
+│   ├── graph.js            # Force-directed Canvas visualizer
+│   ├── package.json        # npm dependencies
+│   └── package-lock.json   # Lock file
+│
+├── src/java/               # Original Java Swing application
+│   ├── MainWindow.java     # App entry point & layout
+│   ├── DashboardPanel.java # Main dashboard view
+│   ├── SocialNetwork.java  # Java graph engine
+│   ├── DatabaseManager.java
+│   ├── AddFriendPanel.java
+│   ├── AddUserPanel.java
+│   ├── MutualFriendsPanel.java
+│   ├── SuggestFriendsPanel.java
+│   ├── GraphPanel.java
+│   ├── DataPersistence.java
+│   ├── Theme.java
+│   ├── User.java
+│   └── NetworkStatsTracker.java
+│
+├── docs/                   # Technical documentation
+│   ├── DSA_SUMMARY.md      # Algorithm breakdown (BFS, Heap, HashMap)
+│   └── PROJECT_DOCUMENTATION.md
+│
+├── .gitignore
+└── README.md
+```
 
-This project visualizes and interacts with a graph-based network. It implements essential data structures (Hash Tables, Graphs, Queues, Max-Heaps) from scratch to drive features like mutual friend calculations, network visualization, and advanced friend suggestions.
+## Quick Start
 
----
+### Web App (Recommended)
+```bash
+cd web
+npm install
+npm run dev
+```
+Visit `http://localhost:5173`
 
-## 🛠️ Key Features
+### Java App (Legacy)
+```bash
+cd src/java
+javac -cp ".;sqlite-jdbc.jar" *.java
+java -cp ".;sqlite-jdbc.jar" MainWindow
+```
 
-- **Lead Architecture & Dashboard UI**: A multi-view SPA architecture built with Vite and vanilla JavaScript.
-- **Core Algorithms (BFS & Max-Heap)**: level-by-level network topography visualization and ranked "Friend Suggestions" based on mutual connection density.
-- **Interactive Network Graph Engine**: A custom force-directed physics engine using HTML5 Canvas for real-time node/edge simulation.
-- **Premium Design System**: Glassmorphism effects, dark mode aesthetics, and responsive CSS animations.
-- **State Persistence**: Automatic browser `localStorage` serialization for persistent data storage.
+## Tech Stack
+- **Web**: Vanilla JS, HTML5 Canvas, Vite
+- **Java**: Swing GUI, SQLite via JDBC
+- **Algorithms**: BFS traversal, Max-Heap (friend suggestions), HashMap lookups
 
----
-
-## 🧠 Core Data Structures Used
-
-| Structure | ES6 Implementation | Algorithmic Purpose |
-|---|---|---|
-| **Hash Table** | `Map<String, Object>` | Guaranteed **O(1)** time-complexity for fast user lookup and modification. |
-| **Adjacency List** | `Map<String, Set<String>>` | The primary Graph structure; maps users to sets of their connected friends. |
-| **Queue (BFS)** | Array Operations (`push/shift`) | Used heavily for Level-1 / Level-2 friend traversal and discovery. |
-| **Max-Heap** | Array Sort Simulation | Ranks friend suggestions by sorting candidates based on mutual connection count. |
-| **Set** | `Set<String>` | Enables ultra-fast **O(1)** intersection calculations for mutual friends. |
-
----
-
-## 🚀 How to Run Locally
-
-You must have **Node.js** installed on your computer.
-
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
-
-3. Open your browser and navigate to `http://localhost:5173`.
-
----
-
-## 🎨 UI & Additional Features
-
-- **Dynamic Network Graph:** Live physics simulation of nodes and edges built entirely in vanilla JS.
-- **Fully Persistent:** All added users and friendships are saved automatically to your browser cache.
-- **BFS Visualizer:** Select a user and run a live visualization of their network depth tier-by-tier.
-
-*Built with Vite · HTML5 Canvas · Vanilla JavaScript · Pure CSS*
+## Author
+Chaitanya Bhujbal — [GitHub](https://github.com/chaitanyabhujbal912006-afk)

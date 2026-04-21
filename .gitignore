@@ -1,33 +1,31 @@
-# Dependencies
-node_modules/
-.vite/
-dist/
-dist-ssr/
-*.local
-
-# Java Build Artifacts
+# --- Java build artifacts ---
 *.class
 *.jar
 *.war
 *.ear
+out/
+build/
+target/
 
-# Databases
+# --- Java database files ---
 *.db
 *.dat
 *.sqlite
 
-# OS Specific
+# --- Web / Node ---
+node_modules/
+dist/
+.vite/
+*.local
+
+# --- OS & Editor ---
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# IDE Settings
 .vscode/
 .idea/
-*.swp
-*.swo
+*.iml
 
-# Temp/Demo Files
-dummy_test_file.md
-demo_file.txt
-math_utils_demo.py
+# --- Temp / Debug ---
+*.log
+*.tmp
+index_original.css
