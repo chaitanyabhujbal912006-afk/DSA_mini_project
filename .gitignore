@@ -1,5 +1,33 @@
+# Dependencies
 node_modules/
 .vite/
+dist/
+dist-ssr/
+*.local
+
+# Java Build Artifacts
 *.class
-socialnetwork.db
-socialnetwork_data.dat
+*.jar
+*.war
+*.ear
+
+# Databases
+*.db
+*.dat
+*.sqlite
+
+# OS Specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE Settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp/Demo Files
+dummy_test_file.md
+demo_file.txt
+math_utils_demo.py
